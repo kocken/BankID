@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,10 @@ namespace BankID.Client.Models
 {
     public class AuthorizeResponseDTO
     {
-        public string autoStartToken { get; set; }
-        public string orderRef { get; set; }
+        [JsonProperty("autoStartToken")]
+        public string AutoStartToken { get; set; }
+
+        [JsonProperty("orderRef")]
+        public string OrderRef { get; set; }
     }
 }

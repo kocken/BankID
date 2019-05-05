@@ -35,8 +35,8 @@ namespace BankID.Client
 
             return await GetDeserializedObjectResponseAsync<AuthorizeResponseDTO>("auth", new AuthRequestDTO
             {
-                endUserIp = endUserIp,
-                personalNumber = personalNumber,
+                EndUserIp = endUserIp,
+                PersonalNumber = personalNumber,
                 Requirement = requirement
             });
         }
@@ -73,10 +73,10 @@ namespace BankID.Client
 
             return await GetDeserializedObjectResponseAsync<AuthorizeResponseDTO>("sign", new SignRequestDTO
             {
-                endUserIp = endUserIp,
-                userVisibleData = userVisibleData,
-                userNonVisibleData = userNonVisibleData,
-                personalNumber = personalNumber,
+                EndUserIp = endUserIp,
+                UserVisibleData = userVisibleData,
+                UserNonVisibleData = userNonVisibleData,
+                PersonalNumber = personalNumber,
                 Requirement = requirement
             });
         }
@@ -90,7 +90,7 @@ namespace BankID.Client
 
             return await GetDeserializedObjectResponseAsync<CollectResponseDTO>("collect", new CollectRequestDTO
             {
-                orderRef = orderRef
+                OrderRef = orderRef
             });
         }
 
@@ -103,7 +103,7 @@ namespace BankID.Client
 
             var response = await GetResponseAsync("cancel", new CancelRequestDTO
             {
-                orderRef = orderRef
+                OrderRef = orderRef
             });
 
             return response.StatusCode == HttpStatusCode.OK; // empty JSON object returned on success
@@ -118,16 +118,16 @@ namespace BankID.Client
 
             if (collectResponse.IsPending())
             {
-                if (collectResponse.hintCode == "outstandingTransaction" || collectResponse.hintCode == "noClient")
+                if (collectResponse.HintCode == "outstandingTransaction" || collectResponse.HintCode == "noClient")
                     return UserMessages.RFA1;
 
-                if (collectResponse.hintCode == "userSign")
+                if (collectResponse.HintCode == "userSign")
                     return UserMessages.RFA9;
 
-                if (collectResponse.hintCode == "outstandingTransaction")
+                if (collectResponse.HintCode == "outstandingTransaction")
                     return UserMessages.RFA13;
 
-                if (collectResponse.hintCode == "started")
+                if (collectResponse.HintCode == "started")
                     return UserMessages.RFA14AB15AB;
 
                 return UserMessages.RFA21;
@@ -135,16 +135,16 @@ namespace BankID.Client
 
             if (collectResponse.IsFailed())
             {
-                if (collectResponse.hintCode == "userCancel")
+                if (collectResponse.HintCode == "userCancel")
                     return UserMessages.RFA6;
 
-                if (collectResponse.hintCode == "expiredTransaction")
+                if (collectResponse.HintCode == "expiredTransaction")
                     return UserMessages.RFA8;
 
-                if (collectResponse.hintCode == "certificateErr")
+                if (collectResponse.HintCode == "certificateErr")
                     return UserMessages.RFA16;
 
-                if (collectResponse.hintCode == "startFailed")
+                if (collectResponse.HintCode == "startFailed")
                     return isQrCodeUsed ? UserMessages.RFA17B : UserMessages.RFA17A;
 
                 return UserMessages.RFA22;

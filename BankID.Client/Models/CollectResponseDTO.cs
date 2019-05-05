@@ -1,4 +1,5 @@
 ﻿using BankID.Client.Models.Completed;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,24 +10,31 @@ namespace BankID.Client.Models
 {
     public class CollectResponseDTO
     {
-        public string orderRef { get; set; }
-        public string status { get; set; }
-        public string hintCode { get; set; }
-        public CompletionResponseDTO completionData { get; set; }
+        [JsonProperty("orderRef")]
+        public string OrderRef { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("hintCode")]
+        public string HintCode { get; set; }
+
+        [JsonProperty("completionData")]
+        public CompletionResponseDTO CompletionData { get; set; }
 
         public bool IsComplete()
         {
-            return status == "complete";
+            return Status == "complete";
         }
 
         public bool IsFailed()
         {
-            return status == "failed";
+            return Status == "failed";
         }
 
         public bool IsPending()
         {
-            return status == "pending";
+            return Status == "pending";
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,16 @@ namespace BankID.Client.Models.Completed
 {
     public class UserResponseDTO
     {
-        public string personalNumber { get; set; }
-        public string name { get; set; }
-        public string givenName { get; set; }
-        public string surname { get; set; }
+        [JsonProperty("personalNumber")]
+        public string PersonalNumber { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("givenName")]
+        public string GivenName { get; set; }
+
+        [JsonProperty("surname")]
+        public string Surname { get; set; }
     }
 }

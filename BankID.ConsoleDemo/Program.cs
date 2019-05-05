@@ -18,7 +18,7 @@ namespace BankID.ConsoleDemo
         private static readonly string _certificateName = null; // TODO assign
 
         // Used to decide if the bank ID client should use the production or test endpoint URL.
-        private static readonly bool _isProduction = true;
+        private static readonly bool _isProduction = true; // TODO confirm environment, use false if using test certificate
 
         // The personal number to use for the BankID authentication attempt.
         // Has to include century, for example "19850101xxxx".
@@ -48,11 +48,11 @@ namespace BankID.ConsoleDemo
 
             Console.WriteLine($"Attempting to authenticate user \"{_personalNumber}\" on IP \"{networkIp}\"");
             var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, _personalNumber);
-            await SleepUntilCompletionAsync(bankIdClient, authenticateResponse.orderRef);
+            await SleepUntilCompletionAsync(bankIdClient, authenticateResponse.OrderRef);
 
             Console.WriteLine($"Attempting to sign user \"{_personalNumber}\" on IP \"{networkIp}\"");
             var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, _signMessage, null, _personalNumber);
-            await SleepUntilCompletionAsync(bankIdClient, signResponse.orderRef);
+            await SleepUntilCompletionAsync(bankIdClient, signResponse.OrderRef);
 
             Console.WriteLine("Press any key to end the demo.");
             Console.ReadKey();
@@ -71,7 +71,7 @@ namespace BankID.ConsoleDemo
             Console.WriteLine(bankIdClient.ResolveUserMessage(result));
             if (result.IsComplete())
             {
-                Console.WriteLine($"The authorized user's name is \"{result.completionData.user.name}\".");
+                Console.WriteLine($"The authorized user's name is \"{result.CompletionData?.User?.Name}\".");
                 return true;
             }
 
