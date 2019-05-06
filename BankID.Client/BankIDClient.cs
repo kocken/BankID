@@ -4,6 +4,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using BankID.Client.Exceptions;
 using BankID.Client.Models;
 using BankID.Client.Types;
 using Newtonsoft.Json;
@@ -109,7 +110,7 @@ namespace BankID.Client
             return response.StatusCode == HttpStatusCode.OK; // empty JSON object returned on success
         }
 
-        public string ResolveUserMessage(CollectResponseDTO collectResponse, bool isQrCodeUsed = false)
+        public string GetUserMessage(CollectResponseDTO collectResponse, bool automaticStart = false, bool isQrCodeUsed = false)
         {
             if (collectResponse == null)
             {
@@ -118,13 +119,13 @@ namespace BankID.Client
 
             if (collectResponse.IsPending())
             {
-                if (collectResponse.HintCode == "outstandingTransaction" || collectResponse.HintCode == "noClient")
+                if (!automaticStart && collectResponse.HintCode == "outstandingTransaction" || collectResponse.HintCode == "noClient")
                     return UserMessages.RFA1;
 
                 if (collectResponse.HintCode == "userSign")
                     return UserMessages.RFA9;
 
-                if (collectResponse.HintCode == "outstandingTransaction")
+                if (automaticStart && collectResponse.HintCode == "outstandingTransaction")
                     return UserMessages.RFA13;
 
                 if (collectResponse.HintCode == "started")
@@ -135,6 +136,9 @@ namespace BankID.Client
 
             if (collectResponse.IsFailed())
             {
+                if (collectResponse.HintCode == "cancelled")
+                    return UserMessages.RFA3;
+
                 if (collectResponse.HintCode == "userCancel")
                     return UserMessages.RFA6;
 
@@ -158,12 +162,45 @@ namespace BankID.Client
             return UserMessages.UNKNOWN_STATUS;
         }
 
+        public string GetUserMessage(Exception exception)
+        {
+            if (exception is AlreadyInProgressException)
+                return UserMessages.RFA4;
+
+            if (exception is RequestTimeoutException || exception is InternalErrorException || exception is MaintenanceException)
+                return UserMessages.RFA5;
+
+            return UserMessages.RFA22;
+        }
+
         private async Task<IRestResponse> GetResponseAsync(string resource, object body)
         {
             var client = GetRestClient();
             var request = GetRestRequest(resource, body);
 
-            return await client.ExecuteTaskAsync(request);
+            var response = await client.ExecuteTaskAsync(request);
+
+            if (!response.IsSuccessful)
+            {
+                var errorResponse = JsonConvert.DeserializeObject<ErrorResponseDTO>(response.Content);
+
+                if (errorResponse?.ErrorCode == "alreadyInProgress")
+                    throw new AlreadyInProgressException();
+
+                if (errorResponse?.ErrorCode == "requestTimeout")
+                    throw new RequestTimeoutException();
+
+                if (errorResponse?.ErrorCode == "internalError")
+                    throw new InternalErrorException();
+
+                if (errorResponse?.ErrorCode == "Maintenance")
+                    throw new MaintenanceException();
+
+                if (!string.IsNullOrEmpty(errorResponse?.ErrorCode))
+                    throw new Exception(errorResponse.ErrorCode + ": " + errorResponse.Details);
+            }
+
+            return response;
         }
 
         private async Task<T> GetDeserializedObjectResponseAsync<T>(string resource, object body)

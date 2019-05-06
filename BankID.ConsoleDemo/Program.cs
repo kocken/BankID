@@ -46,13 +46,27 @@ namespace BankID.ConsoleDemo
             var networkIp = await GetNetworkIPAsync();
             Console.WriteLine($"Local network IP \"{networkIp}\" will be used as end user IP.");
 
-            Console.WriteLine($"Attempting to authenticate user \"{_personalNumber}\" on IP \"{networkIp}\"");
-            var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, _personalNumber);
-            await SleepUntilCompletionAsync(bankIdClient, authenticateResponse.OrderRef);
+            try
+            {
+                Console.WriteLine($"Attempting to authenticate user \"{_personalNumber}\" on IP \"{networkIp}\"");
+                var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, _personalNumber);
+                await SleepUntilCompletionAsync(bankIdClient, authenticateResponse.OrderRef);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(bankIdClient.GetUserMessage(e));
+            }
 
-            Console.WriteLine($"Attempting to sign user \"{_personalNumber}\" on IP \"{networkIp}\"");
-            var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, _signMessage, null, _personalNumber);
-            await SleepUntilCompletionAsync(bankIdClient, signResponse.OrderRef);
+            try
+            {
+                Console.WriteLine($"Attempting to sign user \"{_personalNumber}\" on IP \"{networkIp}\"");
+                var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, _signMessage, null, _personalNumber);
+                await SleepUntilCompletionAsync(bankIdClient, signResponse.OrderRef);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(bankIdClient.GetUserMessage(e));
+            }
 
             Console.WriteLine("Press any key to end the demo.");
             Console.ReadKey();
@@ -63,12 +77,12 @@ namespace BankID.ConsoleDemo
             var result = await bankIdClient.CollectAsync(orderRef);
             while (result.IsPending())
             {
-                Console.WriteLine(bankIdClient.ResolveUserMessage(result));
-                Thread.Sleep(2000);
+                Console.WriteLine(bankIdClient.GetUserMessage(result, false, false));
+                Thread.Sleep(1000);
                 result = await bankIdClient.CollectAsync(orderRef);
             }
 
-            Console.WriteLine(bankIdClient.ResolveUserMessage(result));
+            Console.WriteLine(bankIdClient.GetUserMessage(result, false, false));
             if (result.IsComplete())
             {
                 Console.WriteLine($"The authorized user's name is \"{result.CompletionData?.User?.Name}\".");

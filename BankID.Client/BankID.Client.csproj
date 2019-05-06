@@ -50,10 +50,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BankIDClient.cs" />
+    <Compile Include="Exceptions\MaintenanceException.cs" />
+    <Compile Include="Exceptions\InternalErrorException.cs" />
+    <Compile Include="Exceptions\RequestTimeoutException.cs" />
+    <Compile Include="Exceptions\AlreadyInProgressException.cs" />
     <Compile Include="Models\Completed\CertificateResponseDTO.cs" />
     <Compile Include="Models\Completed\CompletionResponseDTO.cs" />
     <Compile Include="Models\Completed\DeviceResponseDTO.cs" />
     <Compile Include="Models\Completed\UserResponseDTO.cs" />
+    <Compile Include="Models\ErrorResponseDTO.cs" />
     <Compile Include="Types\EncodeType.cs" />
     <Compile Include="Models\AuthRequestDTO.cs" />
     <Compile Include="Models\AuthorizeResponseDTO.cs" />
