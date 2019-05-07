@@ -64,6 +64,9 @@
                 success: function (data) {
                     console.log(data);
                     $("#status").text(data.UserMessage);
+                    if (data.Status === "Complete") {
+                        $("#status").text("Authorized user: " + data.CollectResponse.completionData.user.name);
+                    }
                     if (data.Status !== "Pending") {
                         $("#spinner").hide();
                         clearInterval(loop);

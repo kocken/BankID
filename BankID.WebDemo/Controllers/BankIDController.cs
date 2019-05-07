@@ -70,7 +70,6 @@ namespace BankID.WebDemo.Controllers
     // https://stackoverflow.com/a/38096572
     static class HttpRequestMessageExtensions
     {
-
         private const string HttpContext = "MS_HttpContext";
         private const string RemoteEndpointMessage = "System.ServiceModel.Channels.RemoteEndpointMessageProperty";
         private const string OwinContext = "MS_OwinContext";
