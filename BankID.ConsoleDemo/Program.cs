@@ -15,17 +15,17 @@ namespace BankID.ConsoleDemo
     {
         // The distinguished/subject name of the installed RP certificate to use.
         // For example "FP Testcert 2" for the RP test certificate.
-        private static readonly string _certificateName = null; // TODO assign
+        private static readonly string CertificateName = null; // TODO assign
 
         // Used to decide if the bank ID client should use the production or test endpoint URL.
-        private static readonly bool _isProduction = true; // TODO confirm environment, use false if using test certificate
+        private static readonly bool IsProduction = true; // TODO confirm environment, use false if using test certificate
 
         // The personal number to use for the BankID authentication attempt.
         // Has to include century, for example "19850101xxxx".
-        private static readonly string _personalNumber = null; // TODO assign
+        private static readonly string PersonalNumber = null; // TODO assign
 
         // The message that displays to the user when signing.
-        private static readonly string _signMessage = "This is a demo signing." + 
+        private static readonly string SignMessage = "This is a demo signing." + 
             Environment.NewLine + Environment.NewLine +
             "\"Environment.NewLine\" can be used in this message.";
 
@@ -37,9 +37,9 @@ namespace BankID.ConsoleDemo
             ServicePointManager.DefaultConnectionLimit = 9999;
 
             Console.WriteLine($"Initializing BankID client " +
-                $"using {(_isProduction ? "production" : "test")} environment " +
-                $"with certificate \"{_certificateName}\".");
-            var bankIdClient = new BankIDClient(_isProduction, _certificateName);
+                $"using {(IsProduction ? "production" : "test")} environment " +
+                $"with certificate \"{CertificateName}\".");
+            var bankIdClient = new BankIDClient(IsProduction, CertificateName);
 
             // Note: The passed IP should be the IP of the end user.
             // Grabbing and using our own local network IP as we're the end-user in this case.
@@ -48,8 +48,8 @@ namespace BankID.ConsoleDemo
 
             try
             {
-                Console.WriteLine($"Attempting to authenticate user \"{_personalNumber}\" on IP \"{networkIp}\"");
-                var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, _personalNumber);
+                Console.WriteLine($"Attempting to authenticate user \"{PersonalNumber}\" on IP \"{networkIp}\"");
+                var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, PersonalNumber);
                 await SleepUntilCompletionAsync(bankIdClient, authenticateResponse.OrderRef);
             }
             catch (Exception e)
@@ -59,8 +59,8 @@ namespace BankID.ConsoleDemo
 
             try
             {
-                Console.WriteLine($"Attempting to sign user \"{_personalNumber}\" on IP \"{networkIp}\"");
-                var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, _signMessage, null, _personalNumber);
+                Console.WriteLine($"Attempting to sign user \"{PersonalNumber}\" on IP \"{networkIp}\"");
+                var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, SignMessage, null, PersonalNumber);
                 await SleepUntilCompletionAsync(bankIdClient, signResponse.OrderRef);
             }
             catch (Exception e)

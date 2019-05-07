@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankID.Client", "BankID.Cli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankID.ConsoleDemo", "BankID.ConsoleDemo\BankID.ConsoleDemo.csproj", "{766E27DA-E9CA-44EC-A0A5-32C8D6B49061}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BankID.WebDemo", "BankID.WebDemo\BankID.WebDemo.csproj", "{848DA5EC-C7BA-4433-A0A0-88F78161FE0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{766E27DA-E9CA-44EC-A0A5-32C8D6B49061}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{766E27DA-E9CA-44EC-A0A5-32C8D6B49061}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{766E27DA-E9CA-44EC-A0A5-32C8D6B49061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{848DA5EC-C7BA-4433-A0A0-88F78161FE0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{848DA5EC-C7BA-4433-A0A0-88F78161FE0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{848DA5EC-C7BA-4433-A0A0-88F78161FE0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{848DA5EC-C7BA-4433-A0A0-88F78161FE0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

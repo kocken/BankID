@@ -55,9 +55,7 @@ namespace BankID.Client
                 userVisibleData = EncodeStringToBase64(userVisibleData);
 
                 if (userNonVisibleData != null)
-                {
                     userNonVisibleData = EncodeStringToBase64(userNonVisibleData);
-                }
             }
 
             if (userVisibleData.Length > 40000)
@@ -108,6 +106,25 @@ namespace BankID.Client
             });
 
             return response.StatusCode == HttpStatusCode.OK; // empty JSON object returned on success
+        }
+
+        public StatusType GetStatus(CollectResponseDTO collectResponse)
+        {
+            if (collectResponse == null)
+            {
+                throw new ArgumentException("The \"collectResponse\" argument is required.");
+            }
+
+            if (collectResponse.IsComplete())
+                return StatusType.Complete;
+
+            if (collectResponse.IsFailed())
+                return StatusType.Failed;
+
+            if (collectResponse.IsPending())
+                return StatusType.Pending;
+
+            return StatusType.Unknown;
         }
 
         public string GetUserMessage(CollectResponseDTO collectResponse, bool automaticStart = false, bool isQrCodeUsed = false)
@@ -283,13 +300,10 @@ namespace BankID.Client
 
                     var targetCert = certCollection.Find(X509FindType.FindBySubjectDistinguishedName, certName, false);
                     if (targetCert.Count == 0)
-                    {
                         targetCert = certCollection.Find(X509FindType.FindBySubjectName, certName, false);
-                    }
+
                     if (targetCert.Count > 0)
-                    {
                         return targetCert[0];
-                    }
                 }
                 finally
                 {

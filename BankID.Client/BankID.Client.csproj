@@ -69,6 +69,8 @@
     <Compile Include="Models\OrderRequestDTO.cs" />
     <Compile Include="Models\SignRequestDTO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Types\LanguageType.cs" />
+    <Compile Include="Types\StatusType.cs" />
     <Compile Include="UserMessages.cs" />
   </ItemGroup>
   <ItemGroup>

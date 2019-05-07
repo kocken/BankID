@@ -1,0 +1,87 @@
+﻿@model BankID.WebDemo.Models.AuthenticationModel
+
+@{
+    ViewBag.Title = "Authenticate";
+}
+
+<h1>Mobile BankID</h1>
+<form onsubmit="validateSSN() && initializeBankId(); return false;" id="authenticationForm">
+    <div class="form-group">
+        @Html.LabelFor(model => model.PersonalNumber, "Personal number")
+        @Html.EditorFor(model => model.PersonalNumber, new { htmlAttributes = new { @class = "form-control col-md-2", placeholder = "YYYYMMDDXXXX", id = "personalNumberInput" } })
+        @Html.ValidationMessageFor(model => model.PersonalNumber, "", new { @class = "text-danger" })
+    </div>
+
+    <button type="submit" class="btn btn-primary">Authenticate</button>
+</form>
+
+<div class="col-md-2 text-center" style="display: none" id="processing">
+    <div class="spinner-border text-primary text-center" style="width: 3rem; height: 3rem;" role="status" id="spinner">
+        <span class="sr-only">Loading...</span>
+    </div>
+    <p id="status">Initializing...</p>
+    <br />
+    <a href="#" onclick="reset(); return false;">Reset</a>
+</div>
+
+<script>
+    function validateSSN() {
+        return $("#personalNumberInput").val().length == 12;
+    }
+
+    function initializeBankId() {
+        $("#authenticationForm").hide();
+        $("#processing").show();
+        $("#spinner").show();
+
+        $.ajax({
+            url: '/api/bankid/authenticate',
+            method: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: $("#personalNumberInput").val(),
+            success: function (data) {
+                waitForCompletion(data);
+            },
+            error: function (xhr) {
+                $("#spinner").hide();
+                $("#status").text(xhr.responseText);
+            }
+        });
+    }
+
+    function waitForCompletion(authResponse) {
+        var loop = setInterval(function () {
+            console.log(authResponse);
+            $.ajax({
+                url: '/api/bankid/collect',
+                method: 'GET',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: {
+                    orderRef: authResponse.orderRef
+                },
+                success: function (data) {
+                    console.log(data);
+                    $("#status").text(data.UserMessage);
+                    if (data.Status !== "Pending") {
+                        $("#spinner").hide();
+                        clearInterval(loop);
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                    $("#spinner").hide();
+                    $("#status").text(data.responseText);
+                    clearInterval(loop);
+                }
+            });
+        }, 1000);
+    }
+
+    function reset() {
+        $("#authenticationForm").show();
+        $("#processing").hide();
+        $("#status").text("Initializing...");
+    }
+</script>

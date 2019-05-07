@@ -19,6 +19,6 @@ namespace BankID.Client.Models.Completed
         public string GivenName { get; set; }
 
         [JsonProperty("surname")]
-        public string Surname { get; set; }
+        public string SurName { get; set; }
     }
 }
