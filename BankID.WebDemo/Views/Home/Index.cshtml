@@ -1,4 +1,4 @@
-﻿@model BankID.WebDemo.Models.AuthenticationModel
+﻿@model BankID.WebDemo.Models.PersonalNumberModel
 
 @{
     ViewBag.Title = "Authenticate";
@@ -8,14 +8,14 @@
 <form onsubmit="validateSSN() && initializeBankId(); return false;" id="authenticationForm">
     <div class="form-group">
         @Html.LabelFor(model => model.PersonalNumber, "Personal number")
-        @Html.EditorFor(model => model.PersonalNumber, new { htmlAttributes = new { @class = "form-control col-md-2", placeholder = "YYYYMMDDXXXX", id = "personalNumberInput" } })
+        @Html.EditorFor(model => model.PersonalNumber, new { htmlAttributes = new { @class = "form-control col-md-3", placeholder = "YYYYMMDDXXXX", id = "personalNumberInput" } })
         @Html.ValidationMessageFor(model => model.PersonalNumber, "", new { @class = "text-danger" })
     </div>
 
     <button type="submit" class="btn btn-primary">Authenticate</button>
 </form>
 
-<div class="col-md-2 text-center" style="display: none" id="processing">
+<div class="col-md-3 text-center" style="display: none" id="processing">
     <div class="spinner-border text-primary text-center" style="width: 3rem; height: 3rem;" role="status" id="spinner">
         <span class="sr-only">Loading...</span>
     </div>
@@ -34,12 +34,20 @@
         $("#processing").show();
         $("#spinner").show();
 
+        var json = {
+            EndUserIp: null,
+            PersonalNumber: $("#personalNumberInput").val(),
+            Requirement: null
+        };
+
+        console.log(json);
+
         $.ajax({
             url: '/api/bankid/authenticate',
             method: 'POST',
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
-            data: $("#personalNumberInput").val(),
+            data: JSON.stringify(json),
             success: function (data) {
                 waitForCompletion(data);
             },

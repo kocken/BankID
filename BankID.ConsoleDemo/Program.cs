@@ -39,7 +39,7 @@ namespace BankID.ConsoleDemo
             Console.WriteLine($"Initializing BankID client " +
                 $"using {(IsProduction ? "production" : "test")} environment " +
                 $"with certificate \"{CertificateName}\".");
-            var bankIdClient = new BankIDClient(IsProduction, CertificateName);
+            var bankIdClient = new BankIdClient(IsProduction, CertificateName);
 
             // Note: The passed IP should be the IP of the end user.
             // Grabbing and using our own local network IP as we're the end-user in this case.
@@ -72,7 +72,7 @@ namespace BankID.ConsoleDemo
             Console.ReadKey();
         }
 
-        private static async Task<bool> SleepUntilCompletionAsync(BankIDClient bankIdClient, string orderRef)
+        private static async Task<bool> SleepUntilCompletionAsync(BankIdClient bankIdClient, string orderRef)
         {
             var result = await bankIdClient.CollectAsync(orderRef);
             while (result.IsPending())

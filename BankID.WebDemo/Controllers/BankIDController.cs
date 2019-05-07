@@ -20,17 +20,64 @@ namespace BankID.WebDemo.Controllers
         // Used to decide if the bank ID client should use the production or test endpoint URL.
         private static readonly bool IsProduction = true; // TODO confirm environment, use false if using test certificate
 
-        private static readonly BankIDClient BankIdClient = new BankIDClient(IsProduction, CertificateName);
+        private static readonly BankIdClient BankIdClient = new BankIdClient(IsProduction, CertificateName);
 
         [HttpPost]
         [Route("api/bankid/authenticate")]
-        public async Task<AuthorizeResponseDTO> AuthenticateAsync([FromBody]string personalNumber)
+        public async Task<AuthorizeResponseDTO> AuthenticateAsync(AuthenticateModel contract)
         {
             try
             {
-                var ipAddress = await Request.GetClientIpStringAsync();
+                if (contract.EndUserIp == null)
+                {
+                    contract.EndUserIp = await Request.GetClientIpStringAsync();
+                }
 
-                return await BankIdClient.AuthenticateAsync(ipAddress, personalNumber);
+                return await BankIdClient.AuthenticateAsync(contract.EndUserIp, contract.PersonalNumber, contract.Requirement);
+            }
+            catch (Exception e)
+            {
+                var errorMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(BankIdClient.GetUserMessage(e))
+                };
+
+                throw new HttpResponseException(errorMessage);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/bankid/sign")]
+        public async Task<AuthorizeResponseDTO> SignAsync(SignModel contract)
+        {
+            try
+            {
+                if (contract.EndUserIp == null)
+                {
+                    contract.EndUserIp = await Request.GetClientIpStringAsync();
+                }
+
+                return await BankIdClient.SignAsync(contract.EndUserIp, Client.Types.EncodeType.Undecoded, 
+                    contract.UserVisibleData, contract.UserNonVisibleData, contract.PersonalNumber, contract.Requirement);
+            }
+            catch (Exception e)
+            {
+                var errorMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
+                {
+                    Content = new StringContent(BankIdClient.GetUserMessage(e))
+                };
+
+                throw new HttpResponseException(errorMessage);
+            }
+        }
+
+        [HttpGet]
+        [Route("api/bankid/cancel")]
+        public async Task<bool> CancelAsync(string orderRef)
+        {
+            try
+            {
+                return await BankIdClient.CancelAsync(orderRef);
             }
             catch (Exception e)
             {

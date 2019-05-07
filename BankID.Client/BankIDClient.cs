@@ -12,7 +12,7 @@ using RestSharp;
 
 namespace BankID.Client
 {
-    public class BankIDClient
+    public class BankIdClient
     {
         private readonly string _productionUrl = "https://appapi2.bankid.com/rp/v5";
         private readonly string _testUrl = "https://appapi2.test.bankid.com/rp/v5";
@@ -21,7 +21,7 @@ namespace BankID.Client
 
         private readonly X509Certificate2 _certificate;
 
-        public BankIDClient(bool isProductionEnvironment, string certificateName)
+        public BankIdClient(bool isProductionEnvironment, string certificateName)
         {
             this._isProduction = isProductionEnvironment;
             this._certificate = GetCertificateFromStore(certificateName);

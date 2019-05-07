@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BankIDClient.cs" />
+    <Compile Include="BankIdClient.cs" />
     <Compile Include="Exceptions\MaintenanceException.cs" />
     <Compile Include="Exceptions\InternalErrorException.cs" />
     <Compile Include="Exceptions\RequestTimeoutException.cs" />

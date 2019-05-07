@@ -6,7 +6,7 @@ using System.Web;
 
 namespace BankID.WebDemo.Models
 {
-    public class AuthenticationModel
+    public class PersonalNumberModel
     {
         [Required]
         [MinLength(12, ErrorMessage = "The personal number must be 12 characters long.")]
