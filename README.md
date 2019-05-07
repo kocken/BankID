@@ -1,7 +1,6 @@
 # BankID-Implementation
-BankID API implementation written in C# using .NET Framework. 
+BankID API implementation written in C# using .NET Framework. The solution includes two simple demo projects for testing purposes.
 
-## The solution includes two simple demo projects for testing purposes:
 ### BankID.WebDemo
 Includes a Web API project to communicate with the BankID service through the BankID.Client library. Also includes a MVC project, whereas the MVC frontend works as a basic SPA which modifies the view and communicates to the API using JavaScript.
 
