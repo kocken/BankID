@@ -7,6 +7,7 @@ Includes a Web API project to communicate with the BankID service through the Ba
 ### BankID.ConsoleDemo
 Console application that directly interacts with the BankID.Client library.
 
+### Notes
 These projects do not include .NET authorization or authentication, the demo projects were created to solely interact with the BankID service through the BankID.Client library. Only swedish user messages are supported.
 
 This implementation expects and requires the BankID certificates to be installed and stored locally. Install the RP and server certificate to your local key store.
