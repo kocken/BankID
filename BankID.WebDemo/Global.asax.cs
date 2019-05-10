@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -13,6 +14,11 @@ namespace BankID.WebDemo
     {
         protected void Application_Start()
         {
+            // Set the program to use the recommended TLS version, TLS1.2.
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            // Bumps up the connection limit as the default value is quite low (10).
+            ServicePointManager.DefaultConnectionLimit = 9999;
+
             GlobalConfiguration.Configure(WebApiConfig.Register);
 
             GlobalConfiguration.Configuration.Routes.MapHttpRoute(
