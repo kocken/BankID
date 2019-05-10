@@ -92,13 +92,13 @@ namespace BankID.WebDemo.Controllers
 
         [HttpGet]
         [Route("api/bankid/collect")]
-        public async Task<StatusModel> CollectAsync(string orderRef)
+        public async Task<StatusModel> CollectAsync(string orderRef, bool isAutomaticStart, bool isQrCodeUsed)
         {
             try
             {
                 var collectResponse = await BankIdClient.CollectAsync(orderRef);
                 var status = BankIdClient.GetStatus(collectResponse);
-                var userMessage = BankIdClient.GetUserMessage(collectResponse);
+                var userMessage = BankIdClient.GetUserMessage(collectResponse, isAutomaticStart, isQrCodeUsed);
 
                 return new StatusModel(collectResponse, status.ToString(), userMessage);
             }
@@ -145,6 +145,7 @@ namespace BankID.WebDemo.Controllers
                     return ctx.Request.UserHostAddress;
                 }
             }
+
             //Self-hosting
             if (request.Properties.ContainsKey(RemoteEndpointMessage))
             {
@@ -154,6 +155,7 @@ namespace BankID.WebDemo.Controllers
                     return remoteEndpoint.Address;
                 }
             }
+
             //Owin-hosting
             if (request.Properties.ContainsKey(OwinContext))
             {
@@ -163,6 +165,7 @@ namespace BankID.WebDemo.Controllers
                     return ctx.Request.RemoteIpAddress;
                 }
             }
+
             if (System.Web.HttpContext.Current != null)
             {
                 return System.Web.HttpContext.Current.Request.UserHostAddress;

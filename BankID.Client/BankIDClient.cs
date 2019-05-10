@@ -127,7 +127,7 @@ namespace BankID.Client
             return StatusType.Unknown;
         }
 
-        public string GetUserMessage(CollectResponseDTO collectResponse, bool automaticStart = false, bool isQrCodeUsed = false)
+        public string GetUserMessage(CollectResponseDTO collectResponse, bool isAutomaticStart = false, bool isQrCodeUsed = false)
         {
             if (collectResponse == null)
             {
@@ -136,13 +136,13 @@ namespace BankID.Client
 
             if (collectResponse.IsPending())
             {
-                if (!automaticStart && collectResponse.HintCode == "outstandingTransaction" || collectResponse.HintCode == "noClient")
+                if (collectResponse.HintCode == "outstandingTransaction" && !isAutomaticStart || collectResponse.HintCode == "noClient")
                     return UserMessages.RFA1;
 
                 if (collectResponse.HintCode == "userSign")
                     return UserMessages.RFA9;
 
-                if (automaticStart && collectResponse.HintCode == "outstandingTransaction")
+                if (collectResponse.HintCode == "outstandingTransaction" && isAutomaticStart)
                     return UserMessages.RFA13;
 
                 if (collectResponse.HintCode == "started")

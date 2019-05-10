@@ -19,7 +19,7 @@
     <div class="spinner-border text-primary text-center" style="width: 3rem; height: 3rem;" role="status" id="spinner">
         <span class="sr-only">Loading...</span>
     </div>
-    <p id="status">Initializing...</p>
+    <p id="status">Starta BankID-appen</p>
     <br />
     <a href="#" onclick="reset(); return false;">Reset</a>
 </div>
@@ -67,7 +67,9 @@
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
                 data: {
-                    orderRef: authResponse.orderRef
+                    orderRef: authResponse.orderRef,
+                    isAutomaticStart: false,
+                    isQrCodeUsed: false
                 },
                 success: function (data) {
                     console.log(data);
@@ -93,6 +95,6 @@
     function reset() {
         $("#authenticationForm").show();
         $("#processing").hide();
-        $("#status").text("Initializing...");
+        $("#status").text("Starta BankID-appen");
     }
 </script>
