@@ -106,7 +106,7 @@ namespace BankID.Client
                 OrderRef = orderRef
             });
 
-            return response.StatusCode == HttpStatusCode.OK; // empty JSON object returned on success
+            return response.StatusCode == HttpStatusCode.OK; // The BankId services returns an empty JSON object on success
         }
 
         public StatusType GetStatus(CollectResponseDTO collectResponse)
