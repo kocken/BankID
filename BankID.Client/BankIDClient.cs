@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -21,10 +22,10 @@ namespace BankID.Client
 
         private readonly X509Certificate2 _certificate;
 
-        public BankIdClient(bool isProductionEnvironment, string certificateName)
+        public BankIdClient(bool isProductionEnvironment, string certificateThumbprint)
         {
             this._isProduction = isProductionEnvironment;
-            this._certificate = GetCertificateFromStore(certificateName);
+            this._certificate = GetCertificateFromStore(certificateThumbprint);
         }
 
         public async Task<AuthorizeResponseDTO> AuthenticateAsync(string endUserIp, string personalNumber = null, string requirement = null)
@@ -277,18 +278,22 @@ namespace BankID.Client
             return base64String;
         }
 
-        private X509Certificate2 GetCertificateFromStore(string certName)
+        private X509Certificate2 GetCertificateFromStore(string certificateThumbprint)
         {
-            if (string.IsNullOrEmpty(certName))
+            if (string.IsNullOrEmpty(certificateThumbprint))
             {
-                throw new ArgumentException("The \"certName\" argument is not valid.");
+                throw new ArgumentException("The \"certificateThumbprint\" argument is not valid.");
             }
 
             var certStores = new X509Store[]
             {
-                new X509Store(StoreName.Root),
-                new X509Store(StoreName.My)
+                new X509Store(StoreName.Root, StoreLocation.LocalMachine),
+                new X509Store(StoreName.My, StoreLocation.LocalMachine),
+                new X509Store(StoreName.AuthRoot, StoreLocation.LocalMachine),
+                new X509Store(StoreName.CertificateAuthority, StoreLocation.LocalMachine)
             };
+            var certCollections = new List<X509Certificate2Collection>();
+
             foreach (var certStore in certStores)
             {
                 try
@@ -296,12 +301,10 @@ namespace BankID.Client
                     certStore.Open(OpenFlags.ReadOnly);
 
                     var certCollection = certStore.Certificates;
+                    certCollections.Add(certCollection);
                     certCollection = certCollection.Find(X509FindType.FindByTimeValid, DateTime.Now, false);
 
-                    var targetCert = certCollection.Find(X509FindType.FindBySubjectDistinguishedName, certName, false);
-                    if (targetCert.Count == 0)
-                        targetCert = certCollection.Find(X509FindType.FindBySubjectName, certName, false);
-
+                    var targetCert = certCollection.Find(X509FindType.FindByThumbprint, certificateThumbprint, false);
                     if (targetCert.Count > 0)
                         return targetCert[0];
                 }
@@ -311,7 +314,13 @@ namespace BankID.Client
                 }
             }
 
-            throw new Exception($"Certificate \"{certName}\" was not found in the certificate stores.");
+            var message = $"BankID certificate thumbprint \"{certificateThumbprint}\" was not found in the certificate stores. Found certificates: {Environment.NewLine}";
+            for (int i = 0; certStores.Length > i; i++)
+            {
+                message += $"{certStores[i].Location.ToString()}/{certStores[i].Name}: {certCollections[i].Count} {Environment.NewLine}";
+            }
+
+            throw new Exception(message);
         }
     }
 }

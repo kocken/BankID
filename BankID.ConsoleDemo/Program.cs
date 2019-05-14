@@ -13,9 +13,8 @@ namespace BankID.ConsoleDemo
 {
     class Program
     {
-        // The distinguished/subject name of the installed RP certificate to use.
-        // For example "FP Testcert 2" for the RP test certificate.
-        private static readonly string CertificateName = null; // TODO assign
+        // The thumbprint of the installed RP certificate to use. Be sure not to include any spaces.
+        private static readonly string CertificateThumbprint = null; // TODO assign
 
         // Used to decide if the bank ID client should use the production or test endpoint URL.
         private static readonly bool IsProduction = true; // TODO confirm environment, use false if using test certificate
@@ -37,9 +36,8 @@ namespace BankID.ConsoleDemo
             ServicePointManager.DefaultConnectionLimit = 9999;
 
             Console.WriteLine($"Initializing BankID client " +
-                $"using {(IsProduction ? "production" : "test")} environment " +
-                $"with certificate \"{CertificateName}\".");
-            var bankIdClient = new BankIdClient(IsProduction, CertificateName);
+                $"using {(IsProduction ? "production" : "test")} environment.");
+            var bankIdClient = new BankIdClient(IsProduction, CertificateThumbprint);
 
             // Note: The passed IP should be the IP of the end user.
             // Grabbing and using our own local network IP as we're the end-user in this case.
