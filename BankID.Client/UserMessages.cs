@@ -18,7 +18,7 @@ namespace BankID.Client
         public static string RFA8 { get { return "BankID-appen svarar inte. Kontrollera att den är startad och att du har internetanslutning. Om du inte har något giltigt BankID kan du hämta ett hos din Bank. Försök sedan igen."; } }
         public static string RFA9 { get { return "Skriv in din säkerhetskod i BankID-appen och välj Legitimera eller Skriv under."; } }
         // RFA10-12 doesn't exist
-        public static string RFA13 { get { return "Försöker starta BankID-appen."; } }
+        public static string RFA13 { get { return "Försöker starta BankID-appen..."; } }
         // The recommended RFA14 A/B & RFA15 A/B messages are combined as a single & shorter custom message
         public static string RFA14AB15AB { get { return "Söker efter BankID, det kan ta en liten stund..."; } }
         public static string RFA16 { get { return "Det BankID du försöker använda är för gammalt eller spärrat. Använd ett annat BankID eller hämta ett nytt hos din internetbank."; } }
