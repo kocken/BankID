@@ -10,8 +10,12 @@ This solution includes two demo projects which interacts with the BankID service
 ### BankID.WebDemo
 This web demo demonstrates how the BankID client class can be used to manage the mobile BankID authentication flow through a web-app or website. The demo functions as a basic Single Page Application (SPA) - the frontend app communicates with the backend API using JavaScript & jQuery, and uses response values to modify the visual view. The frontend includes mobile app-launch support for an even more seamless user experience (although note that app-launch support is untested for this specific demo). The backend runs on MVC & Web API.
 
+![Alt text](web-demo.gif?raw=true "Preview")
+
 ### BankID.ConsoleDemo
 This console application interacts directly with the BankID client class to demonstrate the mobile BankID authentication and signing flow, in a GUI-like manner.
+
+![Alt text](console-demo.gif?raw=true "Preview")
 
 ### Notes
 - Only Swedish user messages are supported
