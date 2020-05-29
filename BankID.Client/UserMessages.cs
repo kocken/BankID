@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BankID.Client
+﻿namespace BankID.Client
 {
     public static class UserMessages
     {
@@ -31,6 +25,6 @@ namespace BankID.Client
         public static string RFA22 { get { return "Okänt fel. Försök igen."; } }
 
         public static string UNKNOWN_STATUS { get { return "Okänd status. Försök igen."; } }
-        public static string SUCCESSFUL_AUTHENTICATION { get { return "Autentiseringen lyckades."; }}
+        public static string SUCCESSFUL_AUTHENTICATION { get { return "Autentiseringen lyckades."; } }
     }
 }

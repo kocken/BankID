@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using BankID.Client.Exceptions;
+﻿using BankID.Client.Exceptions;
 using BankID.Client.Models;
 using BankID.Client.Types;
 using Newtonsoft.Json;
 using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BankID.Client
 {
-    public class BankIdClient
+    public class BankIdClient : IBankIdClient
     {
         private readonly string _productionUrl = "https://appapi2.bankid.com/rp/v5";
         private readonly string _testUrl = "https://appapi2.test.bankid.com/rp/v5";
@@ -22,10 +21,18 @@ namespace BankID.Client
 
         private readonly X509Certificate2 _certificate;
 
+        private readonly RestClient _restClient;
+
         public BankIdClient(bool isProductionEnvironment, string certificateThumbprint)
         {
-            this._isProduction = isProductionEnvironment;
-            this._certificate = GetCertificateFromStore(certificateThumbprint);
+            // We use TLS1.2 which is the TLS version that BankID recommends
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            // We increase the connection limit as the default value is quite low (10)
+            ServicePointManager.DefaultConnectionLimit = 9999;
+
+            _isProduction = isProductionEnvironment;
+            _certificate = GetCertificateFromStore(certificateThumbprint);
+            _restClient = GetRestClient();
         }
 
         public async Task<AuthorizeResponseDTO> AuthenticateAsync(string endUserIp, string personalNumber = null, string requirement = null)
@@ -43,7 +50,7 @@ namespace BankID.Client
             });
         }
 
-        public async Task<AuthorizeResponseDTO> SignAsync(string endUserIp, EncodeType inputEncodingType, string userVisibleData, 
+        public async Task<AuthorizeResponseDTO> SignAsync(string endUserIp, EncodeType inputEncodingType, string userVisibleData,
             string userNonVisibleData = null, string personalNumber = null, string requirement = null)
         {
             if (string.IsNullOrEmpty(endUserIp) || string.IsNullOrEmpty(userVisibleData))
@@ -193,10 +200,9 @@ namespace BankID.Client
 
         private async Task<IRestResponse> GetResponseAsync(string resource, object body)
         {
-            var client = GetRestClient();
             var request = GetRestRequest(resource, body);
 
-            var response = await client.ExecuteTaskAsync(request);
+            var response = await _restClient.ExecuteAsync(request);
 
             if (!response.IsSuccessful)
             {
@@ -230,10 +236,12 @@ namespace BankID.Client
 
         private RestClient GetRestClient()
         {
-            var client = new RestClient(_isProduction ? _productionUrl : _testUrl);
-            client.ClientCertificates = new X509CertificateCollection
+            var client = new RestClient(_isProduction ? _productionUrl : _testUrl)
             {
-                _certificate
+                ClientCertificates = new X509CertificateCollection
+                {
+                    _certificate
+                }
             };
 
             return client;
@@ -248,10 +256,11 @@ namespace BankID.Client
             request.AddHeader("Content-Type", "application/json");
 
             // It's important to ignore null properties as the API calls otherwise fail due to "invalidParameters"
-            string serializedBody = JsonConvert.SerializeObject(body, new JsonSerializerSettings {
-                    NullValueHandling = NullValueHandling.Ignore
-                }
-            );
+            string serializedBody = JsonConvert.SerializeObject(body, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
             request.AddJsonBody(serializedBody);
 
             return request;
@@ -292,6 +301,7 @@ namespace BankID.Client
                 new X509Store(StoreName.AuthRoot, StoreLocation.LocalMachine),
                 new X509Store(StoreName.CertificateAuthority, StoreLocation.LocalMachine)
             };
+
             var certCollections = new List<X509Certificate2Collection>();
 
             foreach (var certStore in certStores)
@@ -301,12 +311,15 @@ namespace BankID.Client
                     certStore.Open(OpenFlags.ReadOnly);
 
                     var certCollection = certStore.Certificates;
-                    certCollections.Add(certCollection);
-                    certCollection = certCollection.Find(X509FindType.FindByTimeValid, DateTime.Now, false);
 
-                    var targetCert = certCollection.Find(X509FindType.FindByThumbprint, certificateThumbprint, false);
-                    if (targetCert.Count > 0)
-                        return targetCert[0];
+                    if (certCollection != null && certCollection.Count > 0)
+                    {
+                        certCollections.Add(certCollection);
+
+                        certCollection = certCollection.Find(X509FindType.FindByThumbprint, certificateThumbprint, false);
+                        if (certCollection.Count > 0)
+                            return certCollection[0];
+                    }
                 }
                 finally
                 {
@@ -314,10 +327,13 @@ namespace BankID.Client
                 }
             }
 
-            var message = $"BankID certificate thumbprint \"{certificateThumbprint}\" was not found in the certificate stores. Found certificates: {Environment.NewLine}";
+            var message = $"BankID certificate thumbprint \"{certificateThumbprint}\" was not found in the certificate stores." +
+                $"{Environment.NewLine}{Environment.NewLine}" +
+                $"Found certificates:";
+
             for (int i = 0; certStores.Length > i; i++)
             {
-                message += $"{certStores[i].Location.ToString()}/{certStores[i].Name}: {certCollections[i].Count} {Environment.NewLine}";
+                message += $"{Environment.NewLine}{certStores[i].Location}/{certStores[i].Name}: {certCollections[i].Count}";
             }
 
             throw new Exception(message);

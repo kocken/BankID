@@ -1,10 +1,5 @@
 ﻿using BankID.Client.Models.Completed;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BankID.Client.Models
 {
@@ -24,17 +19,17 @@ namespace BankID.Client.Models
 
         public bool IsComplete()
         {
-            return Status == "complete";
+            return Status?.ToLower() == "complete";
         }
 
         public bool IsFailed()
         {
-            return Status == "failed";
+            return Status?.ToLower() == "failed";
         }
 
         public bool IsPending()
         {
-            return Status == "pending";
+            return Status?.ToLower() == "pending";
         }
     }
 }

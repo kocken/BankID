@@ -1,11 +1,10 @@
 ﻿using BankID.Client;
+using BankID.Client.Models;
 using BankID.Client.Types;
 using System;
-using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,42 +12,29 @@ namespace BankID.ConsoleDemo
 {
     class Program
     {
-        // The thumbprint of the installed RP certificate to use. Be sure not to include any spaces.
-        private static readonly string CertificateThumbprint = null; // TODO assign
-
-        // Used to decide if the bank ID client should use the production or test endpoint URL.
-        private static readonly bool IsProduction = true; // TODO confirm environment, use false if using test certificate
-
-        // The personal number to use for the BankID authentication attempt.
-        // Has to include century, for example "19850101xxxx".
-        private static readonly string PersonalNumber = null; // TODO assign
-
-        // The message that displays to the user when signing.
-        private static readonly string SignMessage = "This is a demo signing." + 
-            Environment.NewLine + Environment.NewLine +
-            "\"Environment.NewLine\" can be used in this message.";
-
-        static async Task Main(string[] args)
+        static async Task Main()
         {
-            // Set the program to use the recommended TLS version, TLS1.2.
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            // Bumps up the connection limit as the default value is quite low (10).
-            ServicePointManager.DefaultConnectionLimit = 9999;
+            Console.WriteLine("BankID-Implementation console demo has started.");
 
-            Console.WriteLine($"Initializing BankID client " +
-                $"using {(IsProduction ? "production" : "test")} environment.");
-            var bankIdClient = new BankIdClient(IsProduction, CertificateThumbprint);
+            var bankIdIsProduction = bool.Parse(ConfigurationManager.AppSettings["BankID.IsProduction"]);
+            var bankIdCertificateThumbprint = ConfigurationManager.AppSettings["BankID.CertificateThumbprint"];
+            var bankIdSignMessage = ConfigurationManager.AppSettings["BankID.SignMessage"];
 
-            // Note: The passed IP should be the IP of the end user.
-            // Grabbing and using our own local network IP as we're the end-user in this case.
+            Console.WriteLine($"Initializing BankID client with the {(bankIdIsProduction ? "production" : "test")} environment.");
+
+            var bankIdClient = new BankIdClient(bankIdIsProduction, bankIdCertificateThumbprint);
+
             var networkIp = await GetNetworkIPAsync();
-            Console.WriteLine($"Local network IP \"{networkIp}\" will be used as end user IP.");
+            // Console.WriteLine($"Local network IP \"{networkIp}\" will be assigned as end user IP.");
+
+            var personalNumber = GetPersonalNumberInput();
 
             try
             {
-                Console.WriteLine($"Attempting to authenticate user \"{PersonalNumber}\" on IP \"{networkIp}\"");
-                var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, PersonalNumber);
-                await SleepUntilCompletionAsync(bankIdClient, authenticateResponse.OrderRef);
+                Console.WriteLine("Attempting to authenticate user");
+
+                var authenticateResponse = await bankIdClient.AuthenticateAsync(networkIp, personalNumber);
+                var collectResponse = await WaitForCompletionAsync(bankIdClient, authenticateResponse.OrderRef);
             }
             catch (Exception e)
             {
@@ -57,9 +43,10 @@ namespace BankID.ConsoleDemo
 
             try
             {
-                Console.WriteLine($"Attempting to sign user \"{PersonalNumber}\" on IP \"{networkIp}\"");
-                var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, SignMessage, null, PersonalNumber);
-                await SleepUntilCompletionAsync(bankIdClient, signResponse.OrderRef);
+                Console.WriteLine("Attempting to sign user");
+
+                var signResponse = await bankIdClient.SignAsync(networkIp, EncodeType.Undecoded, bankIdSignMessage, null, personalNumber);
+                var collectResponse = await WaitForCompletionAsync(bankIdClient, signResponse.OrderRef);
             }
             catch (Exception e)
             {
@@ -70,30 +57,89 @@ namespace BankID.ConsoleDemo
             Console.ReadKey();
         }
 
-        private static async Task<bool> SleepUntilCompletionAsync(BankIdClient bankIdClient, string orderRef)
+        private static async Task<CollectResponseDTO> WaitForCompletionAsync(BankIdClient bankIdClient, string orderRef)
         {
             var result = await bankIdClient.CollectAsync(orderRef);
+
             while (result.IsPending())
             {
                 Console.WriteLine(bankIdClient.GetUserMessage(result, false, false));
+
                 Thread.Sleep(1000);
                 result = await bankIdClient.CollectAsync(orderRef);
             }
 
             Console.WriteLine(bankIdClient.GetUserMessage(result, false, false));
+
             if (result.IsComplete())
             {
                 Console.WriteLine($"The authorized user's name is \"{result.CompletionData?.User?.Name}\".");
-                return true;
             }
 
-            return false;
+            return result;
         }
 
         private static async Task<string> GetNetworkIPAsync()
         {
             var httpClient = new HttpClient();
-            return await httpClient.GetStringAsync("https://api.ipify.org");
+            var ip = await httpClient.GetStringAsync("https://api.ipify.org");
+
+            return ip;
+        }
+
+        private static string GetPersonalNumberInput()
+        {
+            string personalNumber = null;
+
+            for (int inputAttempts = 0; !IsValidPersonalNumber(personalNumber); inputAttempts++)
+            {
+                if (inputAttempts > 0)
+                {
+                    Console.WriteLine("The social security number was invalid.");
+                }
+
+                Console.Write("Assign your social security number (12 numbers): ");
+                personalNumber = GetCensoredInput();
+            }
+
+            return personalNumber;
+        }
+
+        private static string GetCensoredInput()
+        {
+            // https://stackoverflow.com/a/3404522/13516445
+            string input = "";
+            do
+            {
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                // Backspace Should Not Work
+                if (key.Key != ConsoleKey.Backspace && key.Key != ConsoleKey.Enter)
+                {
+                    input += key.KeyChar;
+                    Console.Write("*");
+                }
+                else
+                {
+                    if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                    {
+                        input = input.Substring(0, (input.Length - 1));
+                        Console.Write("\b \b");
+                    }
+                    else if (key.Key == ConsoleKey.Enter)
+                    {
+                        Console.WriteLine();
+                        break;
+                    }
+                }
+            } while (true);
+
+            return input;
+        }
+
+        private static bool IsValidPersonalNumber(string personalNumber)
+        {
+            // TODO: validate personal number (with pattern) for production use
+            return personalNumber != null && personalNumber.Length == 12 && personalNumber.All(x => char.IsDigit(x));
         }
     }
 }

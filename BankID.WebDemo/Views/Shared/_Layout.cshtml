@@ -6,16 +6,19 @@
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
-                @Html.ActionLink("WebDemo", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("BankID-Implementation web demo", "Authenticate", "Site", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <ul class="nav navbar-nav">
-                <li>@Html.ActionLink("Authenticate", "Index", "Home")</li>
-                <li>@Html.ActionLink("About", "About", "Home")</li>
+                <li>@Html.ActionLink("Authenticate", "Authenticate")</li>
+                <li>@Html.ActionLink("About", "About")</li>
             </ul>
         </div>
     </div>
@@ -23,14 +26,11 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - <a href="https://github.com/kocken/bankid-implementation">BankID-implementation</a></p>
+            <p>Created by <a href="https://github.com/kocken" target="_blank">Mikael Karlgren</a></p>
         </footer>
     </div>
 
-    @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>

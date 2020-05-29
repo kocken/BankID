@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using Autofac;
+using Autofac.Integration.WebApi;
+using BankID.Client;
+using System.Configuration;
+using System.Reflection;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -12,25 +13,31 @@ namespace BankID.WebDemo
 {
     public class MvcApplication : HttpApplication
     {
+        public static IContainer Container;
+
         protected void Application_Start()
         {
-            // Set the program to use the recommended TLS version, TLS1.2.
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            // Bumps up the connection limit as the default value is quite low (10).
-            ServicePointManager.DefaultConnectionLimit = 9999;
+            RegisterAutofac();
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
-
-            GlobalConfiguration.Configuration.Routes.MapHttpRoute(
-                name: "Default Api",
-                routeTemplate: "api/{controller}/{action}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-            );
-
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        protected void RegisterAutofac()
+        {
+            var bankIdIsProduction = bool.Parse(ConfigurationManager.AppSettings["BankID.IsProduction"]);
+            var bankIdCertificateThumbprint = ConfigurationManager.AppSettings["BankID.CertificateThumbprint"];
+
+            var builder = new ContainerBuilder();
+
+            builder.RegisterApiControllers(Assembly.GetExecutingAssembly());
+
+            builder.RegisterInstance(new BankIdClient(bankIdIsProduction, bankIdCertificateThumbprint)).As<IBankIdClient>();
+            
+            Container = builder.Build();
         }
     }
 }

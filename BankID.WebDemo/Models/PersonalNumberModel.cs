@@ -1,16 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
 
 namespace BankID.WebDemo.Models
 {
     public class PersonalNumberModel
     {
-        [Required]
-        [MinLength(12, ErrorMessage = "The personal number must be 12 characters long.")]
-        [MaxLength(12, ErrorMessage = "The personal number must be 12 characters long.")]
+        // TODO: add personal number pattern validation
+        [Required(ErrorMessage = "Personal number must be assigned.")]
+        [MinLength(12, ErrorMessage = "Personal number must be 12 numbers long.")]
+        [MaxLength(12, ErrorMessage = "Personal number must be 12 numbers long.")]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "Personal number may only contain numbers.")]
+        [JsonProperty("personalNumber")]
         public string PersonalNumber { get; set; }
+
+        public PersonalNumberModel()
+        {
+            PersonalNumber = string.Empty;
+        }
     }
 }

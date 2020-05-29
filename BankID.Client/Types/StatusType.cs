@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace BankID.Client.Types
+﻿namespace BankID.Client.Types
 {
     public enum StatusType
     {
