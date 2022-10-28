@@ -1,24 +1,24 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
-namespace BankID.WebDemo.Models
+namespace BankId.WebDemo.Models
 {
     public class SignModel
     {
         [Required]
-        [JsonProperty("userVisibleData")]
+        [JsonPropertyName("userVisibleData")]
         public string UserVisibleData { get; set; }
 
-        [JsonProperty("userNonVisibleData")]
+        [JsonPropertyName("userNonVisibleData")]
         public string UserNonVisibleData { get; set; }
 
-        [JsonProperty("endUserIp")]
+        [JsonPropertyName("endUserIp")]
         public string EndUserIp { get; set; }
 
-        [JsonProperty("personalNumber")]
+        [JsonPropertyName("personalNumber")]
         public string PersonalNumber { get; set; }
 
-        [JsonProperty("requirement")]
+        [JsonPropertyName("requirement")]
         public string Requirement { get; set; }
     }
 }

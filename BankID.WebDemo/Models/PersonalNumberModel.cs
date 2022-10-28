@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
-namespace BankID.WebDemo.Models
+namespace BankId.WebDemo.Models
 {
     public class PersonalNumberModel
     {
@@ -10,7 +10,7 @@ namespace BankID.WebDemo.Models
         [MinLength(12, ErrorMessage = "Personal number must be 12 numbers long.")]
         [MaxLength(12, ErrorMessage = "Personal number must be 12 numbers long.")]
         [RegularExpression("^[0-9]*$", ErrorMessage = "Personal number may only contain numbers.")]
-        [JsonProperty("personalNumber")]
+        [JsonPropertyName("personalNumber")]
         public string PersonalNumber { get; set; }
 
         public PersonalNumberModel()

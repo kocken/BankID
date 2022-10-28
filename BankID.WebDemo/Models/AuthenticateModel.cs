@@ -1,16 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
-namespace BankID.WebDemo.Models
+namespace BankId.WebDemo.Models
 {
     public class AuthenticateModel
     {
-        [JsonProperty("endUserIp")]
+        [JsonPropertyName("userVisibleData")]
+        public string UserVisibleData { get; set; }
+
+        [JsonPropertyName("userNonVisibleData")]
+        public string UserNonVisibleData { get; set; }
+
+        [JsonPropertyName("endUserIp")]
         public string EndUserIp { get; set; }
 
-        [JsonProperty("personalNumber")]
+        [JsonPropertyName("personalNumber")]
         public string PersonalNumber { get; set; }
 
-        [JsonProperty("requirement")]
+        [JsonPropertyName("requirement")]
         public string Requirement { get; set; }
     }
 }

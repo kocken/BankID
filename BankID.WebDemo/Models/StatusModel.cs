@@ -1,20 +1,20 @@
-﻿using BankID.Client.Models;
-using Newtonsoft.Json;
+﻿using BankId.ServiceClient.Models;
+using System.Text.Json.Serialization;
 
-namespace BankID.WebDemo.Models
+namespace BankId.WebDemo.Models
 {
     public class StatusModel
     {
-        [JsonProperty("collectResponse")]
-        public CollectResponseDTO CollectResponse { get; set; }
+        [JsonPropertyName("collectResponse")]
+        public CollectResponse CollectResponse { get; set; }
 
-        [JsonProperty("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; }
 
-        [JsonProperty("userMessage")]
+        [JsonPropertyName("userMessage")]
         public string UserMessage { get; set; }
 
-        public StatusModel(CollectResponseDTO collectResponse, string status, string userMessage)
+        public StatusModel(CollectResponse collectResponse, string status, string userMessage)
         {
             this.CollectResponse = collectResponse;
             this.Status = status;
