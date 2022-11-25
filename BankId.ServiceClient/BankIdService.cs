@@ -3,6 +3,7 @@ using BankId.ServiceClient.Models;
 using BankId.ServiceClient.Types;
 using RestSharp;
 using System.Net;
+using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
@@ -172,7 +173,7 @@ namespace BankId.ServiceClient
             if (collectResponse.IsPending())
                 return StatusType.Pending;
 
-            return StatusType.Unknown;
+            throw new InvalidOperationException($"Unknown status '{collectResponse?.Status?.ToLower()}'.");
         }
 
         public string GetUserMessage(CollectResponse collectResponse, bool isAutomaticStart = false, bool isQrCodeUsed = false)
@@ -246,6 +247,11 @@ namespace BankId.ServiceClient
 
             if (!response.IsSuccessful)
             {
+                if (string.IsNullOrEmpty(response.Content) && response.ErrorException != null)
+                {
+                    throw response.ErrorException;
+                }
+
                 var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(response.Content);
 
                 if (errorResponse?.ErrorCode == "alreadyInProgress")
@@ -282,7 +288,8 @@ namespace BankId.ServiceClient
                 ClientCertificates = new X509CertificateCollection
                 {
                     _certificate
-                }
+                },
+                RemoteCertificateValidationCallback = ServerCertificateValidation
             };
 
             return new RestClient(options);
@@ -336,16 +343,15 @@ namespace BankId.ServiceClient
                 throw new ArgumentException("The \"certificateThumbprint\" argument is not valid.");
             }
 
-            var certStores = new X509Store[]
+            var storeNames = new[] { StoreName.Root, StoreName.My, StoreName.AuthRoot, StoreName.CertificateAuthority };
+
+            var certStores = new List<X509Store>();
+            foreach (var storeName in storeNames)
             {
-                new X509Store(StoreName.Root, StoreLocation.LocalMachine),
-                new X509Store(StoreName.My, StoreLocation.LocalMachine),
-                new X509Store(StoreName.AuthRoot, StoreLocation.LocalMachine),
-                new X509Store(StoreName.CertificateAuthority, StoreLocation.LocalMachine)
-            };
+                certStores.Add(new X509Store(storeName, StoreLocation.CurrentUser));
+            }
 
             var certCollections = new List<X509Certificate2Collection>();
-
             foreach (var certStore in certStores)
             {
                 try
@@ -373,12 +379,25 @@ namespace BankId.ServiceClient
                 $"{Environment.NewLine}{Environment.NewLine}" +
                 $"Found certificates:";
 
-            for (int i = 0; certStores.Length > i; i++)
+            for (int i = 0; certStores.Count > i; i++)
             {
                 message += $"{Environment.NewLine}{certStores[i].Location}/{certStores[i].Name}: {certCollections[i].Count}";
             }
 
             throw new Exception(message);
+        }
+
+        // We use basic custom validation since API calls can fail without this due to incomplete chains, when missing the validation certificate.
+        // Complete validation is not required by us, since BankID validates the server certificate on their end.
+        private bool ServerCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (!certificate.Issuer.Contains("CN=Test BankID SSL Root CA") && !certificate.Issuer.Contains("CN=BankID SSL Root CA") ||
+                !certificate.Issuer.Contains("OU=Infrastructure CA") || !certificate.Issuer.Contains("O=Finansiell ID-Teknik BID AB"))
+            {
+                throw new Exception($"Failed to verify BankID server certificate by issuer '{certificate.Issuer}'.");
+            }
+
+            return true;
         }
     }
 }

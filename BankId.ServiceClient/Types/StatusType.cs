@@ -2,6 +2,6 @@
 {
     public enum StatusType
     {
-        Complete, Failed, Pending, Unknown
+        Complete, Failed, Pending
     }
 }
