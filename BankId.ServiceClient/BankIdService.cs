@@ -14,8 +14,8 @@ namespace BankId.ServiceClient
 {
     public class BankIdService : IBankIdService
     {
-        private readonly string _productionUrl = "https://appapi2.bankid.com/rp/v5.1";
-        private readonly string _testUrl = "https://appapi2.test.bankid.com/rp/v5.1";
+        private const string _productionUrl = "https://appapi2.bankid.com/rp/v5.1";
+        private const string _testUrl = "https://appapi2.test.bankid.com/rp/v5.1";
 
         private readonly bool _isProduction;
 
@@ -391,10 +391,12 @@ namespace BankId.ServiceClient
         // Complete validation is not required by us, since BankID validates the server certificate on their end.
         private bool ServerCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            if (!certificate.Issuer.Contains("CN=Test BankID SSL Root CA") && !certificate.Issuer.Contains("CN=BankID SSL Root CA") ||
-                !certificate.Issuer.Contains("OU=Infrastructure CA") || !certificate.Issuer.Contains("O=Finansiell ID-Teknik BID AB"))
+            var validIssuers = new[] {
+                "CN=Test BankID SSL Root CA", "CN=BankID SSL Root CA", "OU=Infrastructure CA", "O=Finansiell ID-Teknik BID AB"
+            };
+            if (certificate?.Issuer == null || validIssuers.All(x => !certificate.Issuer.Contains(x)))
             {
-                throw new Exception($"Failed to verify BankID server certificate by issuer '{certificate.Issuer}'.");
+                throw new Exception($"Failed to verify BankID server certificate by issuer '{certificate?.Issuer}'.");
             }
 
             return true;
