@@ -4,6 +4,7 @@ using BankId.ServiceClient.Types;
 using RestSharp;
 using System.Net;
 using System.Net.Security;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
@@ -237,6 +238,21 @@ namespace BankId.ServiceClient
                 return UserMessages.RFA5;
 
             return UserMessages.RFA22;
+        }
+
+        public string GetQrCode(string qrStartToken, string qrStartSecret, int secondsPassed)
+        {
+            var qrStartSecretBytes = Encoding.UTF8.GetBytes(qrStartSecret);
+            var secondsPassedBytes = Encoding.UTF8.GetBytes(secondsPassed.ToString());
+            string qrAuthCode;
+
+            using (var hmac = new HMACSHA256(qrStartSecretBytes))
+            {
+                var hash = hmac.ComputeHash(secondsPassedBytes);
+                qrAuthCode = Convert.ToHexString(hash).ToLower();
+            }
+
+            return $"bankid.{qrStartToken}.{secondsPassed}.{qrAuthCode}";
         }
 
         private async Task<RestResponse> GetResponseAsync(string resource, object body)

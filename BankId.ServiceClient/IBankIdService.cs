@@ -20,5 +20,7 @@ namespace BankId.ServiceClient
         string GetUserMessage(CollectResponse collectResponse, bool isAutomaticStart, bool isQrCodeUsed);
 
         string GetUserMessage(Exception exception);
+
+        string GetQrCode(string qrStartToken, string qrStartSecret, int secondsPassed);
     }
 }
