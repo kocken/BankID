@@ -1,4 +1,4 @@
-# BankID-Implementation
+# BankID
 BankID API implementation and live demos written in C# using .NET 6.
 
 [BankID](https://www.bankid.com/) is a citizen identification solution that allows companies, banks and government agencies to authenticate and conclude agreements with individuals over the Internet. BankID is the most used digital identification solution in Sweden.
